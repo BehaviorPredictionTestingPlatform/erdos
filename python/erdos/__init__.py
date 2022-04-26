@@ -173,6 +173,8 @@ def run(graph_filename: Optional[str] = None,
     logger.debug("Waiting for the dataflow to complete ...")
     driver_handle.wait()
 
+def _run_node(node_id, data_addresses, control_addresses):
+        _internal.run(node_id, data_addresses, control_addresses)
 
 def run_async(graph_filename: Optional[str] = None,
               start_port: Optional[int] = 9000) -> NodeHandle:
@@ -203,11 +205,9 @@ def run_async(graph_filename: Optional[str] = None,
     logger.debug(
         "Running the dataflow graph on addresses: {}".format(data_addresses))
 
-    def runner(node_id, data_addresses, control_addresses):
-        _internal.run(node_id, data_addresses, control_addresses)
-
+    ctx = mp.get_context("fork")
     processes = [
-        mp.Process(target=runner, args=(i, data_addresses, control_addresses))
+        ctx.Process(target=_run_node, args=(i, data_addresses, control_addresses))
         for i in range(1, _num_py_operators + 1)
     ]
 

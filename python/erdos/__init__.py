@@ -144,7 +144,8 @@ class NodeHandle(object):
         logger.info("Shutting down other processes")
         for p in self.processes:
             p.terminate()
-            p.join()
+            # NOTE: The join below causes the process to stall...
+            # p.join()
         logger.info("Shutting down node.")
         self.py_node_handle.shutdown_node()
 
